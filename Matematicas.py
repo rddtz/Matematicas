@@ -1,5 +1,9 @@
-print('Digite a função conforme o exemplo (com os espaços) -> 2x2 + 3x + 9')
-conta = list(input('Digite a função de segundo grau: '))
+
+print('---------- BHASKARA ----------')
+print(' ')
+print('Exemplo (nescessário colocar os espaços) -> 2x2 + 3x + 9')
+print(' ')
+conta = list(input('Digite aqui sua função de segundo grau (conforme o exemplo): '))
 
 tamanho = len(conta)
 a = 0
@@ -9,7 +13,7 @@ c = 0
 #IFs para descobrir os valores.
 
 #Pegar valor A
-if conta[0] == 'x':
+if conta[0] == 'x' or conta[0] == ' ':
     a = 1
 else:
     a = eval(conta[0])
@@ -30,29 +34,39 @@ for n in range(3, 8):
 if len(conta) < 8:
     c = 0
 else:
-    for n in range(8, tamanho):
+    for n in range(tamanho - 5, tamanho):
         if conta[n] == '-':
-            for m in range(8, tamanho):
+            for m in range(tamanho - 5, tamanho):
                 if conta[m] != ' ' and conta[m] != 'x' and conta[m] != '+' and conta[m] != '-':
                     c = eval(conta[m])
                     c -= c * 2
         elif conta[n] == '+':
-            for m in range(8, tamanho):
+            for m in range(tamanho - 5, tamanho):
+
                 if conta[m] != ' ' and conta[m] != 'x' and conta[m] != '+' and conta[m] != '-':
                     c = eval(conta[m])
 
-print('Resultados:')
+#Imprimir os resultados bonitinho
+print(' ')
+print('--------- RESULTADOS ---------')
+print(' ')
+print('Valores ds coeficientes: ')
+print(f'A = {a} | B = {b} | C = {c}')
+print(' ')
 
 #Calcúlo do Delta
 delta = (b*b-(4*a*c))**0.5
 
 if type(delta) != complex:
     if delta > 0:
+        print(f'Valor do delta: {delta}')
+        print(' ')
         Xpos = (-(b) + delta) / (2*a)
-        print('X´ = ', Xpos)
 #Calcúlo das raizes, em cima com + raiz e em baixo - raiz
         Xneg = (-(b) - delta) / (2*a)
-        print('X´´ = ', Xneg)
+
+        print('Valor das raízes: ')
+        print(f'X´ = {Xpos} | X´´ = {Xneg}')
 else:
     print('Como delta é menor que zero, a equação não terá raízes reais, pois não existe raiz quadrada de número negativo.')
 
