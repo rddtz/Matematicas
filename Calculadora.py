@@ -7,19 +7,12 @@
 #Código para receber números e remover os espaços
 lista = list(input('Digite números: '))
 tamanhoL = len(lista)
-print(lista)
-apagar = []
+apagar = 0
 
 for n in range(tamanhoL - 1):
     if lista[n] == ' ':
-        apagar.append(n)
-        print(apagar)
-
-tamanhoA = len(apagar)
-correcao = 0
-
-for m in range(tamanhoA):
-        del lista[apagar[m] - correcao]
-        correcao = correcao + 1
+        apagar += 1
+for n in range(apagar):
+        lista.remove(' ')
 
 print(lista)
