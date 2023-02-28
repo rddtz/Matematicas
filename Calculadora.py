@@ -1,38 +1,123 @@
-#Código para receber números e remover os espaços
+import sys
+
+
+def localEitem():
+    global local
+    global item
+    local.clear()
+    item.clear()
+    for n in range(tamanhoL):
+        if lista[n] == '+':
+            local.append(n)
+            item += lista[n]
+        if lista[n] == '/':
+            local.append(n)
+            item += lista[n]
+        if lista[n] == '-':
+            local.append(n)
+            item += lista[n]
+        if lista[n] == 'x':
+            local.append(n)
+            item += lista[n]
+
+def prioridade():
+    'Analisa e procura se há divisão ou multiplicação para realizar primeiro'
+    global tamanhoL
+    global segurar
+    global tamanhoSegurado
+    global local
+    global item
+
+    localEitem()
+    if tamanhoL > 0:
+        if item[0] != '/':
+            if item[0] != 'x':
+                if lista[local[0]] != '/' or lista[local[0]] != 'x':
+                    while lista[local[0]] == item[0]:
+                        segurar += lista[0]
+                        del lista[0]
+                        local[0] -= 1
+                    del item[0]
+                    del local[0]
+                    tamanhoL = len(lista)
+                    tamanhoSegurado = len(segurar)
+                    localEitem()
+                    if item[0] != '/':
+                        if item[0] != 'x':
+                            if lista[local[0]] != '/' or lista[local[0]] != 'x':
+                                while lista[local[0]] == item[0]:
+                                    segurar += lista[0]
+                                    del lista[0]
+                                    local[0] -= 1
+    tamanhoL = len(lista)
+
+    while tamanhoL > 0:
+        apagasinal() #fazer as contas
+        tamanhoL = len(lista)
+
+    tamanhoSegurado = len(segurar)
+    tamanhoL = len(lista)
+
+    if tamanhoL == 0 and tamanhoSegurado > 0:
+        for i in range(tamanhoSegurado):
+            lista.append(segurar[0])
+            del segurar[0]
+
 def apagasinal():
+    'Analisa qual a operação realizada, remove o sinal da lista e chama a função para realizar a conta'
+
     global total
     global valor
     global tamanhoL
     if lista[0] == '+':
         lista.remove('+')
         tamanhoL = len(lista)
-        valor = decimais(valor)
-        total += valor
-        tamanhoL = len(lista)
+        if tamanhoL == 0:
+            pass
+        else:
+            valor = decimais(valor)
+            total += valor
+            tamanhoL = len(lista)
     elif lista[0] == '-':
         lista.remove('-')
         tamanhoL = len(lista)
-        valor = decimais(valor)
-        total -= valor
-        tamanhoL = len(lista)
-    elif lista[0] == 'x':
+        if tamanhoL == 0:
+            pass
+        else:
+            valor = decimais(valor)
+            total -= valor
+            tamanhoL = len(lista)
+    elif lista[0] == 'x' or lista[0] == 'X':
         lista.remove('x')
         tamanhoL = len(lista)
-        valor = decimais(valor)
-        total *= valor
-        tamanhoL = len(lista)
+        if tamanhoL == 0:
+            pass
+        else:
+            valor = decimais(valor)
+            total *= valor
+            tamanhoL = len(lista)
     elif lista[0] == '/':
         lista.remove('/')
         tamanhoL = len(lista)
-        valor = decimais(valor)
-        total /= valor
-        tamanhoL = len(lista)
+        if tamanhoL == 0:
+            pass
+        else:
+            valor = decimais(valor)
+            try:
+                total /= valor
+            except ZeroDivisionError:
+                print('É impossível dividir por 0')
+                sys.exit()
+            tamanhoL = len(lista)
     else:
         valor = decimais(valor)
         total += valor
         tamanhoL = len(lista)
-#Função pra definir as dezenas, centenas e unidades
+
+
 def decimais(num):
+    'Caso tenha números em sequencia na lista, transforemara em números inteiros maiores (1, 2, 5 vira 125)! Depois retorna o valor obtido para adicionar ao calcúlo.'
+
     num = 0
     LDef = 0
     dezena = 10
@@ -69,33 +154,31 @@ def decimais(num):
 
 #-------------------------------------------
 
-lista = list(input('Digite os números para somar: '))
+lista = list(input('Digite a conta: '))
+segurar = []
+item = []
+local = []
 tamanhoL = len(lista)
+tamanhoSegurado = len(segurar)
 apagar = 0
 
-#Apagar espaços
+#Apagar espaços na lista
 for n in range(tamanhoL - 1):
     if lista[n] == ' ':
         apagar += 1
 for n in range(apagar):
         lista.remove(' ')
 
+
 #variaveis para o while
 tamanhoL = len(lista)
 total = 0
 valor = 0
-l = 0
 
 #aqui o calculo é feito, utilizando while e if para descobrir como sera construida a conta para o computador
-while l != tamanhoL or l < tamanhoL:
-    if lista[l] == 'X':
-        lista[l] = 'x'
-    if tamanhoL == 0:
-        break
-    #chama para fazer as contar
-    apagasinal()
-    #---------------------
-    if l == tamanhoL or tamanhoL == 0:
+while True:
+    prioridade() #chama para fazer as contar
+    if tamanhoL == 0 and tamanhoSegurado == 0:
         break
 
-print(f"A soma equivale a:", total)
+print(f"O resultado é:", total)
