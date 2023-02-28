@@ -1,6 +1,5 @@
 import sys
 
-
 def localEitem():
     global local
     global item
@@ -29,32 +28,36 @@ def prioridade():
     global item
 
     localEitem()
-    if tamanhoL > 0:
-        if item[0] != '/':
-            if item[0] != 'x':
-                if lista[local[0]] != '/' or lista[local[0]] != 'x':
-                    while lista[local[0]] == item[0]:
-                        segurar += lista[0]
-                        del lista[0]
-                        local[0] -= 1
-                    del item[0]
-                    del local[0]
-                    tamanhoL = len(lista)
-                    tamanhoSegurado = len(segurar)
-                    localEitem()
-                    if item[0] != '/':
-                        if item[0] != 'x':
-                            if lista[local[0]] != '/' or lista[local[0]] != 'x':
-                                while lista[local[0]] == item[0]:
-                                    segurar += lista[0]
-                                    del lista[0]
-                                    local[0] -= 1
+    for n in item:
+        if n == '/' or n == 'x':
+            if tamanhoL > 0:
+                if item[0] != '/' and item[0] != 'x':
+                    if lista[local[0]] != '/' or lista[local[0]] != 'x':
+                        while lista[local[0]] == item[0]:
+                            segurar += lista[0]
+                            del lista[0]
+                            local[0] -= 1
+                        del item[0]
+                        del local[0]
+                        tamanhoL = len(lista)
+                        tamanhoSegurado = len(segurar)
+                        localEitem()
+                        tamItem = len(item)
+                        if tamItem > 0:
+                            while item[0] != '/' and item[0] != 'x':
+                                    if lista[local[0]] != '/' or lista[local[0]] != 'x':
+                                        while lista[local[0]] == item[0]:
+                                            segurar += lista[0]
+                                            del lista[0]
+                                            local[0] -= 1
+                                        del item[0]
+                                        del local[0]
+                                        tamanhoL = len(lista)
+                                        tamanhoSegurado = len(segurar)
+                                        localEitem()
     tamanhoL = len(lista)
-
-    while tamanhoL > 0:
-        apagasinal() #fazer as contas
-        tamanhoL = len(lista)
-
+    apagasinal() #fazer as contas
+    tamanhoL = len(lista)
     tamanhoSegurado = len(segurar)
     tamanhoL = len(lista)
 
@@ -66,6 +69,7 @@ def prioridade():
 def apagasinal():
     'Analisa qual a operação realizada, remove o sinal da lista e chama a função para realizar a conta'
 
+    global seguraVal
     global total
     global valor
     global tamanhoL
@@ -75,7 +79,7 @@ def apagasinal():
         if tamanhoL == 0:
             pass
         else:
-            valor = decimais(valor)
+            valor = decimais()
             total += valor
             tamanhoL = len(lista)
     elif lista[0] == '-':
@@ -84,38 +88,61 @@ def apagasinal():
         if tamanhoL == 0:
             pass
         else:
-            valor = decimais(valor)
+            valor = decimais()
             total -= valor
             tamanhoL = len(lista)
-    elif lista[0] == 'x' or lista[0] == 'X':
+    elif lista[0] == 'x':
         lista.remove('x')
         tamanhoL = len(lista)
         if tamanhoL == 0:
             pass
         else:
-            valor = decimais(valor)
-            total *= valor
-            tamanhoL = len(lista)
+            valor = decimais()
+            if seguraVal > 0:
+                seguraVal *= valor
+                tamanhoL = len(lista)
+            else:
+                total *= valor
+                tamanhoL = len(lista)
     elif lista[0] == '/':
         lista.remove('/')
         tamanhoL = len(lista)
         if tamanhoL == 0:
             pass
         else:
-            valor = decimais(valor)
-            try:
-                total /= valor
-            except ZeroDivisionError:
-                print('É impossível dividir por 0')
-                sys.exit()
-            tamanhoL = len(lista)
+            valor = decimais()
+            if seguraVal > 0:
+                try:
+                    seguraVal /= valor
+                except ZeroDivisionError:
+                    print('É impossível dividir por 0')
+                    sys.exit()
+                tamanhoL = len(lista)
+            else:
+                try:
+                    total /= valor
+                except ZeroDivisionError:
+                    print('É impossível dividir por 0')
+                    sys.exit()
+                tamanhoL = len(lista)
     else:
-        valor = decimais(valor)
-        total += valor
-        tamanhoL = len(lista)
+        if tamanhoL > 1 and (lista[1] == 'x' or lista[1] == '/'):
+            valor = decimais()
+            seguraVal += valor
+            tamanhoL = len(lista)
+            apagasinal()
+            if segurar[0] == '-':
+                total -= seguraVal
+            else:
+                total += seguraVal
+            seguraVal = 0
+        else:
+            valor = decimais()
+            total += valor
+            tamanhoL = len(lista)
 
 
-def decimais(num):
+def decimais():
     'Caso tenha números em sequencia na lista, transforemara em números inteiros maiores (1, 2, 5 vira 125)! Depois retorna o valor obtido para adicionar ao calcúlo.'
 
     num = 0
@@ -161,6 +188,7 @@ local = []
 tamanhoL = len(lista)
 tamanhoSegurado = len(segurar)
 apagar = 0
+seguraVal = 0
 
 #Apagar espaços na lista
 for n in range(tamanhoL - 1):
