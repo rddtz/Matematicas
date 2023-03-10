@@ -8,13 +8,12 @@ def calculadora(numApp):
         isso por que ao escrever (10 isso se torna uma string e é preciso separar o ( do dez, deletando o parenteses e rechamando a funçaõ'''
 
         try:
-            if '.' not in item and '0' in item:
+            if '.' not in item and '0' in item and len(item) > 1:
                 listaAux = list(item)
                 while listaAux[0] == '0':
                     del listaAux[0]
                 listaAux = ''.join(listaAux)
-                print('Dentro do bagulho')
-                item = transformarEmNum(listaAux)  # Chama a funcção novamente depois de separar os parenteses
+                item = eval(listaAux)# Chama a funcção novamente depois de separar os parenteses
                 return item
             item = eval(item)
             return item
@@ -71,7 +70,7 @@ def calculadora(numApp):
         '''Chama as funções para adicionar novamente os parenteses, primerios os ( e depois os ), com base nos locais
         que foram salvos pela função localdaPrioridadeParenteses'''
         adicionarParentesesInic()
-        adicionarParentesesFim()
+        adicionarParentesesFim(0)
 
     def localdaPrioridadeParenteses():
         '''Salva o local dos parenteses na lista, para depois que forem removidos pela função transformarEmNum() possam ser
@@ -95,15 +94,16 @@ def calculadora(numApp):
             contador += 1
             localInicio[0] += contador
 
-    def adicionarParentesesFim():
-        contador = 2
-        while True:
-            localFim[0] += contador
-            lista.insert(localFim[0], ')')
-            del localFim[0]
-            if len(localFim) == 0:
-                break
-            contador += 2
+    def adicionarParentesesFim(contar):
+        contador = contar
+        if len(localFim) > 0:
+            while True:
+                localFim[0] += contador
+                lista.insert(localFim[0], ')')
+                del localFim[0]
+                if len(localFim) == 0:
+                    break
+                contador += 2
 
     def localDoFinalDoParenAtual():
         for n in range(len(lista)):
@@ -125,8 +125,7 @@ def calculadora(numApp):
                     listaAux.append(lista[contador])
                 del listaAux[len(listaAux) - 1]
                 del lista[contador]
-                listaAux = calcularPrioridade(
-                    listaAux)  # Caso haja prioridade de X ou / dentro dos parenteses irá ser feito aqui
+                listaAux = calcularPrioridade(listaAux)  # Caso haja prioridade de X ou / dentro dos parenteses irá ser feito aqui
                 for n in range(len(listaAux)):
                     resultado = calcular(listaAux, resultado, n)  # Faz a conta normal com o que sobrou
                 lista.insert(contador, resultado)  # Adiciona o resultado na lista
@@ -155,22 +154,98 @@ def calculadora(numApp):
             if parametro[n] == '/':
                 return n
 
+    def localPoten(parametro):
+        for n in range(len(parametro)):
+            if parametro[n] == '^':
+                return n
+
+    def localRaiz(parametro):
+        for n in range(len(parametro)):
+            if parametro[n] == '√':
+                return n
+
     def deletarDaLista(parametro, local, teve):
         contador = 0
         entao = teve
         listaParaDeletar = parametro
-        if listaParaDeletar[local] == 'x' or listaParaDeletar[local] == '/':
+        if listaParaDeletar[local] == 'x' or listaParaDeletar[local] == '/' or listaParaDeletar[local] == '^' or listaParaDeletar[local] == '√':
             while True:
                 if entao == 'sim':
                     del listaParaDeletar[local - 1]
                     contador += 1
                     if contador == 4:
                         break
+                elif entao == 'raiz':
+                    del listaParaDeletar[local]
+                    contador += 1
+                    if contador == 2:
+                        break
                 else:
                     del listaParaDeletar[local - 1]
                     contador += 1
                     if contador == 3:
                         break
+
+    def fazerRaiz(parametro):
+        listaFazPoten = parametro
+        contadorDeOperacoes = 0
+        analiseSeJaFezTudo = list(filter(lambda item: item == '√', listaFazPoten))
+        global tamanhoLista
+        while True:
+            for n in listaFazPoten:
+                if n == '√':
+                    listaFazPoten = prioridadeRaiz(listaFazPoten)
+                    tamanhoLista = len(listaFazPoten)
+                    contadorDeOperacoes += 1
+                    break
+            if len(analiseSeJaFezTudo) == contadorDeOperacoes:  # ve se todas operações que recebem prioridade ja foram realizado
+                return listaFazPoten
+            else:
+                pass
+
+    def fazerPotencia(parametro):
+        listaFazPoten = parametro
+        contadorDeOperacoes = 0
+        analiseSeJaFezTudo = list(filter(lambda item: item == '^', listaFazPoten))
+        global tamanhoLista
+        while True:
+            for n in listaFazPoten:
+                if n == '^':
+                    listaFazPoten = prioridadePoten(listaFazPoten)
+                    tamanhoLista = len(listaFazPoten)
+                    contadorDeOperacoes += 1
+                    break  # Esse break quebra o For, pra voltar a correr do início da lista sempre que uma operação for realizada
+            if len(analiseSeJaFezTudo) == contadorDeOperacoes:  # ve se todas operações que recebem prioridade ja foram realizado
+                return listaFazPoten
+            else:
+                pass
+
+    def prioridadeRaiz(parametro):
+        listaRaiz = parametro
+        local = localRaiz(listaRaiz)
+        if listaRaiz[local + 1] == '-':
+            print('Não dá não')
+            sys.exit()
+        else:
+            resultado = listaRaiz[local + 1] ** 0.5
+            deletarDaLista(listaRaiz, local, 'raiz')  # Deleta os itens da lista para adicionar o resultado no local
+            listaRaiz.insert(local, resultado)
+            return listaRaiz
+
+    def prioridadePoten(parametro):
+        listaPoten = parametro
+        local = localPoten(listaPoten)
+        if listaPoten[local + 1] == '-':
+            resultado = listaPoten[local - 1] ** (listaPoten[local + 2] * -1)
+            teve = 'sim'
+            deletarDaLista(listaPoten, local, teve)# Deleta os itens da lista para adicionar o resultado no local
+            listaPoten.insert(local - 1, resultado)
+            return listaPoten
+        else:
+            resultado = listaPoten[local - 1] ** listaPoten[local + 1]
+            deletarDaLista(listaPoten, local, '')  # Deleta os itens da lista para adicionar o resultado no local
+            listaPoten.insert(local - 1, resultado)
+            return listaPoten
 
     def prioridadeVezes(parametro):
         listaPriovezes = parametro
@@ -257,6 +332,7 @@ def calculadora(numApp):
     lista = list(map(transformarEmNum, lista))  # Transforma os itens da lista em números inteiros/float se for possivel
     lista = list(filter(lambda item: item != '',lista))  # Remove os espaços novamente, pra caso haja espaço entre os parenteses não tenha erro
 
+
     total = 0
     tamanhoLista = len(lista)
 
@@ -265,7 +341,13 @@ def calculadora(numApp):
         prioridadeParenteses()
         calcularParenteses()
 
-    # Ve se há multiplicação ou divisão, se houver, chama a função para dar prioridade
+
+    # Ve se há multiplicação ou divisão ou potenciação, se houver, chama a função para dar prioridade
+    tamanhoLista = len(lista)
+    lista = fazerPotencia(lista) #potencia
+    lista = fazerRaiz(lista)    #raiz
+
+    tamanhoLista = len(lista)
     lista = calcularPrioridade(lista)
 
     tamanhoLista = len(lista)
